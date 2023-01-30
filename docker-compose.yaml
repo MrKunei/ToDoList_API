@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:14.6-alpine
+    restart: always
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    healthcheck:
+      test: pg_isready -U admin
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "python manage.py migrate"
+
+  api:
+    build:
+      context: .
+    restart: always
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    command: sh -c "python manage.py runserver"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
+  front:
+    image: sermalenk/skypro-front:version_1_1
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+
+volumes:
+  postgres:
