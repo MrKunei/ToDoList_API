@@ -4,53 +4,36 @@ services:
   postgres:
     image: postgres:14.6-alpine
     restart: always
-#    env_file:
-#      - ./.env
-    environment:
-      POSTGRES_PASSWORD: admin
-      POSTGRES_USER: admin
-      POSTGRES_DB: todolist
-      PGDATA: postgres_data
-      POSTGRES_INITDB_ARGS: "-A md5"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
     healthcheck:
       test: pg_isready -U admin
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - back
 
   migrations:
-    build:
-      context: .
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
     command: sh -c "python manage.py migrate"
-    networks:
-      - back
 
   api:
-    build:
-      context: .
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     volumes:
       - ./:/app
     env_file:
       - ./.env
     command: sh -c "python manage.py runserver"
-    ports:
-      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-    networks:
-      - back
-      - front
 
   front:
     image: sermalenk/skypro-front:base
@@ -59,14 +42,8 @@ services:
       - "8080:80"
     depends_on:
       - api
-    networks:
-      - back
-      - front
+
 
 volumes:
   postgres:
   api:
-
-networks:
-  back:
-  front:
