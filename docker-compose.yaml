@@ -53,7 +53,7 @@ services:
       - front
 
   front:
-    image: sermalenk/skypro-front:base
+    image: sermalenk/skypro-front:version_1
     restart: always
     ports:
       - "8080:80"
