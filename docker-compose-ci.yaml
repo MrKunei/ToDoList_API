@@ -1,5 +1,13 @@
 version: "3.8"
 
+volumes:
+  postgres:
+  api:
+
+networks:
+  app-local:
+  app-main:
+
 services:
   postgres:
     image: postgres:14.6-alpine
@@ -9,10 +17,12 @@ services:
     env_file:
       - ./.env
     healthcheck:
-      test: pg_isready -U admin
+      test: pg_isready -U postgres
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-local
 
   migrations:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
@@ -20,6 +30,8 @@ services:
       postgres:
         condition: service_healthy
     command: sh -c "python manage.py migrate"
+    networks:
+      - app-local
 
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
@@ -34,16 +46,18 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+    networks:
+      - app-main
+      - app-local
 
   front:
-    image: sermalenk/skypro-front:base
+    image: sermalenk/skypro-front:lesson-38
     restart: always
     ports:
       - "8080:80"
     depends_on:
       - api
+    networks:
+      - app-main
+      - app-local
 
-
-volumes:
-  postgres:
-  api:
