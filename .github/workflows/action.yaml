@@ -45,7 +45,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd django-todolist
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S docker-compose up -d
