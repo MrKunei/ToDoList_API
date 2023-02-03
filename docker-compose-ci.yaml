@@ -4,8 +4,8 @@ volumes:
   postgres:
 
 networks:
-  app-local:
-  app-main:
+  back:
+  main:
 
 services:
   postgres:
@@ -25,7 +25,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - app-local
+      - back
 
   migrations:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
@@ -34,15 +34,13 @@ services:
         condition: service_healthy
     command: sh -c "python manage.py migrate"
     networks:
-      - app-local
+      - back
 
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
-    env_file:
-      - ./.env
     volumes:
-      - ./:/app
+      - ./.env:/app/.env
     environment:
       POSTGRES_HOST: postgres
     command: sh -c "python manage.py runserver"
@@ -52,8 +50,8 @@ services:
       migrations:
         condition: service_completed_successfully
     networks:
-      - app-main
-      - app-local
+      - main
+      - back
 
   front:
     image: sermalenk/skypro-front:lesson-38
@@ -63,5 +61,5 @@ services:
     depends_on:
       - api
     networks:
-      - app-main
-      - app-local
+      - main
+      - back
