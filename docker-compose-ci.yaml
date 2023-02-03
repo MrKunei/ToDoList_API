@@ -40,6 +40,8 @@ services:
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
+    volumes:
+      - ./:/app
     env_file:
       - ./.env
     command: sh -c "python manage.py runserver 0.0.0.0:8000"
@@ -64,3 +66,4 @@ services:
     networks:
       - back
       - front
+
