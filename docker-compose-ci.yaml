@@ -29,7 +29,7 @@ services:
       - back
 
   migrations:
-    image: vkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,13 +38,15 @@ services:
       - back
 
   api:
-    image: vkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     volumes:
       - ./:/app
     env_file:
       - ./.env
     command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,3 +66,5 @@ services:
     networks:
       - back
       - front
+
+
