@@ -41,6 +41,8 @@ services:
     restart: always
     env_file:
       - ./.env
+    volumes:
+      - ./:/app
     environment:
       POSTGRES_HOST: postgres
     command: sh -c "python manage.py runserver"
