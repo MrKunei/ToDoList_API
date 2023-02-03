@@ -5,24 +5,28 @@ volumes:
   api:
 
 networks:
-  app-local:
-  app-main:
+  back:
+  front:
 
 services:
   postgres:
     image: postgres:14.6-alpine
     restart: always
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
     env_file:
       - ./.env
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_NAME}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: pg_isready -U postgres
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - app-local
+      - back
 
   migrations:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
@@ -31,7 +35,7 @@ services:
         condition: service_healthy
     command: sh -c "python manage.py migrate"
     networks:
-      - app-local
+      - back
 
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
@@ -40,15 +44,17 @@ services:
       - ./:/app
     env_file:
       - ./.env
-    command: sh -c "python manage.py runserver"
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
     networks:
-      - app-main
-      - app-local
+      - back
+      - front
 
   front:
     image: sermalenk/skypro-front:lesson-38
@@ -58,6 +64,5 @@ services:
     depends_on:
       - api
     networks:
-      - app-main
-      - app-local
-
+      - back
+      - front
