@@ -3,63 +3,110 @@ version: "3.8"
 volumes:
   postgres:
 
+#services:
+#  postgres:
+#    image: postgres:14.6-alpine
+#    restart: always
+#    volumes:
+#      - ./postgres_data:/var/lib/postgresql/data
+#    env_file:
+#      - ./.env
+#    environment:
+#      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+#      POSTGRES_USER: $POSTGRES_USER
+#      POSTGRES_DB: $POSTGRES_NAME
+#    healthcheck:
+#      test: pg_isready -U postgres
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#
+#  migrations:
+#    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    command: python manage.py migrate
+#
+#  api:
+#    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+#    restart: always
+#    volumes:
+#      - ./:/usr/src/app
+#    env_file:
+#      - ./.env
+#    environment:
+#      POSTGRES_HOST: postgres
+#      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+#      POSTGRES_USER: $POSTGRES_USER
+#      POSTGRES_DB: $POSTGRES_NAME
+#    command: python manage.py runserver 0.0.0.0:8000
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      migrations:
+#        condition: service_completed_successfully
+#
+#  bot:
+#    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    volumes:
+#      - ./:/usr/src/app
+#    command: python manage.py runbot
+#
+#  front:
+#    image: sermalenk/skypro-front:lesson-38
+#    restart: always
+#    ports:
+#      - "8080:80"
+#    depends_on:
+#      - api
+
+
 services:
-  postgres:
-    image: postgres:14.6-alpine
-    restart: always
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-    env_file:
-      - ./.env
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_NAME}
-    healthcheck:
-      test: pg_isready -U postgres
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  migrations:
-    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+  front:
+    image: sermalenk/skypro-front:lesson-38
+    ports:
+      - 8080:80
     depends_on:
-      postgres:
-        condition: service_healthy
-    command: python manage.py migrate
-
+      - api
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
-    restart: always
-    volumes:
-      - ./:/usr/src/app
-    env_file:
-      - ./.env
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_NAME}
-    command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       postgres:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
-
+    volumes:
+      - ./.env:/app/.env
   bot:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      - ./:/usr/src/app
+      - ./.env:/app/.env
     command: python manage.py runbot
-
-  front:
-    image: sermalenk/skypro-front:lesson-38
-    restart: always
-    ports:
-      - "8080:80"
+  migrations:
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
-      - api
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./.env:/app/.env
+    command: python manage.py migrate
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_NAME
+      POSTGRES_USER: $POSTGRES_USER
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
