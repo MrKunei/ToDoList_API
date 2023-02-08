@@ -98,6 +98,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./.env:/app/.env
+    command: python manage.py runserver 0.0.0.0:8000
 
   bot:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
@@ -111,6 +112,6 @@ services:
   front:
     image: sermalenk/skypro-front:lesson-38
     ports:
-      - 8080:80
+      - "8080:80"
     depends_on:
       - api
