@@ -48,7 +48,7 @@ services:
         condition: service_completed_successfully
 
   bot:
-    image: sermalenk/django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     depends_on:
       postgres:
         condition: service_healthy
