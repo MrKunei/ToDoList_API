@@ -32,7 +32,7 @@ services:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
     volumes:
-      - ./:/usr/src/app
+      - ./:/app
     env_file:
       - ./.env
     environment:
@@ -53,8 +53,8 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./:/usr/src/app
-    command: python manage.py runbot
+      - ./:/app
+    command: sh -c "python manage.py runbot"
 
   front:
     image: sermalenk/skypro-front:lesson-38
