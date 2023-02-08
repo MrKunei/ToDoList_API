@@ -58,6 +58,21 @@ services:
       - back
       - front
 
+  bot:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/usr/src/app
+    command: python manage.py runbot
+    networks:
+      - back
+      - front
+
   front:
     image: sermalenk/skypro-front:lesson-38
     restart: always
@@ -68,4 +83,3 @@ services:
     networks:
       - back
       - front
-
