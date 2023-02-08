@@ -24,8 +24,6 @@ services:
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
-    volumes:
-      - ./:/app
     env_file:
       - ./.env
     environment:
@@ -52,8 +50,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./:/app
     command: sh -c "python manage.py runbot"
 
   front:
