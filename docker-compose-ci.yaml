@@ -21,13 +21,6 @@ services:
       timeout: 5s
       retries: 5
 
-  migrations:
-    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: sh -c "python manage.py migrate"
-
   api:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
     restart: always
@@ -46,6 +39,13 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+
+  migrations:
+    image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "python manage.py migrate"
 
   bot:
     image: mrkunei/todolist-django-app:$GITHUB_REF_NAME-$GITHUB_RUN_ID
