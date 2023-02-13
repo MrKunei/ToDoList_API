@@ -43,7 +43,7 @@ services:
       context: .
     restart: always
     volumes:
-      - ./:/usr/src/app
+      - ./:/app
     env_file:
       - ./.env
     command: python manage.py runserver 0.0.0.0:8000
@@ -67,7 +67,7 @@ services:
       migrations:
         condition: service_completed_successfully
     volumes:
-      - ./:/usr/src/app
+      - ./:/app
     command: python manage.py runbot
     networks:
       - back
